@@ -50,29 +50,34 @@ zstyle ':completion:*' verbose true
 zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
 zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
 
+# UPDATE: Disabled vcs_info approach for now, trying __git_ps1 out for now to see if I like better
 # Git branch colored prompt
-autoload -Uz add-zsh-hook
-autoload -Uz vcs_info
-
-add-zsh-hook precmd vcs_info
-
-zstyle ':vcs_info:*' enable git
-zstyle ':vcs_info:*' formats " %F{gray}%c%u(%b)%f"
-zstyle ':vcs_info:*' actionformats " %F{gray}%c%u(%b)%f %a"
-zstyle ':vcs_info:*' stagedstr "%F{green}"
-zstyle ':vcs_info:*' unstagedstr "%F{magenta}"
-zstyle ':vcs_info:*' check-for-changes true
-
-zstyle ':vcs_info:git*+set-message:*' hooks git-untracked
-
-+vi-git-untracked() {
-    if git --no-optional-locks status --porcelain 2> /dev/null | grep -q "^??"; then
-          hook_com[staged]+="%F{red}"
-    fi
-}
+##autoload -Uz add-zsh-hook
+##autoload -Uz vcs_info
+##
+##add-zsh-hook precmd vcs_info
+##
+##zstyle ':vcs_info:*' enable git
+##zstyle ':vcs_info:*' formats " %F{gray}%c%u(%b)%f"
+##zstyle ':vcs_info:*' actionformats " %F{gray}%c%u(%b)%f %a"
+##zstyle ':vcs_info:*' stagedstr "%F{green}"
+##zstyle ':vcs_info:*' unstagedstr "%F{magenta}"
+##zstyle ':vcs_info:*' check-for-changes true
+##
+##zstyle ':vcs_info:git*+set-message:*' hooks git-untracked
+##
+##+vi-git-untracked() {
+##    if git --no-optional-locks status --porcelain 2> /dev/null | grep -q "^??"; then
+##          hook_com[staged]+="%F{red}"
+##    fi
+##}
 
 setopt PROMPT_SUBST
-export PROMPT='%F{green}%n@%m:%F{blue}%~%F{reset}$vcs_info_msg_0_ %# '
+export GIT_PS1_SHOWCOLORHINTS=true
+export GIT_PS1_SHOWDIRTYSTATE=true
+export GIT_PS1_SHOWUNTRACKEDFILES=true
+##export PROMPT='%F{green}%n@%m:%F{blue}%~%F{reset}$vcs_info_msg_0_ %# '
+export PROMPT='%F{green}%n@%m:%F{blue}%~%F{reset}$(__git_ps1 " (%s) ")%# '
 export PATH=/opt/neovim/usr/bin:$PATH
 
 alias ls='ls --color=auto'
@@ -83,15 +88,19 @@ alias cdo='cd /u/www/htdocs/onyx'
 alias cat='batcat --plain'
 alias oa='/onyx/sys/onyx_admin.php'
 alias vi='nvim'
+# Syntax: vig search_term
+# Opens up all files from git grep result in seperate tabs in neovim
 function vig () {
   nvim -p $(git grep -l -i $1)
 }
+# Friendly consise man pages with examples from "cheat" and tldr
 cheat () {
   curl "cheat.sh/$1"
 }
 
 export EDITOR=nvim
 export BAT_THEME="Enki-Tokyo-Night"
+source /usr/lib/git-core/git-sh-prompt
 source /usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 # Must be last line
 source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
